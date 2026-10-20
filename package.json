@@ -1,0 +1,12 @@
+{
+  "name": "sello-import",
+  "version": "1.0.0",
+  "description": "Bring a journal from Journey, Day One, Markdown notes or a spreadsheet into Sello, end-to-end encrypted",
+  "type": "module",
+  "bin": { "sello-import": "bin/sello-import.mjs" },
+  "files": ["bin", "src"],
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" },
+  "dependencies": { "qrcode": "1.5.4" },
+  "license": "MIT"
+}
