@@ -83,3 +83,31 @@ test('dry run sends nothing; a full journal stops before uploading', async () =>
     await server.close();
   }
 });
+
+test('waits out a short "busy", and stops on a long wait so a later run goes on', async () => {
+  const refuse = [{ status: 429, retryAfter: 1, error: 'Too many changes at once. Try again in a moment.' }];
+  const server = await fakeSello({ refuse });
+  try {
+    const dir = converted();
+    const r = await upload(dir, { server: server.url, client: fast(server.url), showLogin: () => {}, ...quiet });
+    assert.equal(r.added, 2);
+    assert.equal(server.media.size, 1);
+  } finally {
+    await server.close();
+  }
+
+  const later = await fakeSello({ refuse: [{ status: 429, retryAfter: 3600, error: 'Many new journals are uploading right now.' }] });
+  try {
+    rmSync(join(tmp, 'out'), { recursive: true, force: true });
+    const dir = converted();
+    const lines = [];
+    const first = await upload(dir, { server: later.url, client: fast(later.url), showLogin: () => {}, ...quiet, log: (l) => lines.push(l) });
+    assert.equal(first.added, 0);
+    assert.ok(lines.some((l) => l.startsWith('Stopping: Many new journals')));
+    assert.ok(lines.some((l) => l.includes('goes on where it left off')));
+    const again = await upload(dir, { server: later.url, client: fast(later.url), showLogin: () => {}, ...quiet });
+    assert.equal(again.added, 2);
+  } finally {
+    await later.close();
+  }
+});

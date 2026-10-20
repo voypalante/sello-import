@@ -129,7 +129,12 @@ export async function upload(dir, { server, dryRun = false, limit = Infinity, pl
         added++;
       } catch (err) {
         failed.push(`${label}: ${err.message}`);
-        if ([401, 403, 413, 423].includes(err.status)) { bar.end(); log(`Stopping: ${err.message}`); break; }
+        if ([401, 403, 413, 423, 429, 507].includes(err.status)) {
+          bar.end();
+          log(`Stopping: ${err.message}`);
+          if ([429, 507].includes(err.status)) log('Run the same command again later: it goes on where it left off.');
+          break;
+        }
       }
       bar.draw(i + 1, entries.length);
     }
@@ -144,13 +149,18 @@ export async function upload(dir, { server, dryRun = false, limit = Infinity, pl
   return { ok: failed.length === 0, added, skipped, failed, leftOut };
 }
 
+// A short wait the server asks for (busy for a moment) is waited out; a long one (Sello's limits on
+// new journals and uploads per day) stops the import, to be run again later.
+const SHORT_WAIT = 30;
+
 async function retry(fn) {
   for (let i = 1; ; i++) {
     try {
       return await fn();
     } catch (err) {
-      if (i >= 3 || (err.status >= 400 && err.status < 500)) throw err;
-      await new Promise((r) => setTimeout(r, 1500 * i));
+      const brief = err.status === 429 && err.retryAfter && err.retryAfter <= SHORT_WAIT;
+      if (i >= (brief ? 6 : 3) || (err.status >= 400 && err.status < 500 && !brief)) throw err;
+      await new Promise((r) => setTimeout(r, brief ? err.retryAfter * 1000 : 1500 * i));
     }
   }
 }

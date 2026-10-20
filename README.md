@@ -48,7 +48,10 @@ entry is uploaded, with a progress bar. The phone lists the sign-in as "a browse
 out when the import ends.
 
 You can run it again at any time: entries already in your journal are skipped, so an interrupted
-import picks up where it stopped. Try a few first with `--limit 5` if you like. `--place` adds
+import picks up where it stopped. Try a few first with `--limit 5` if you like.
+If Sello is busy for a moment, the import waits and goes on by itself. If it asks for a longer
+wait (many new journals uploading at once, or a lot uploaded in one day), the import stops and
+says so: run the same command again later. `--place` adds
 where an entry was written (when the export has it) as its last line.
 
 **3. Clean up.** The converted folder holds your journal unencrypted. When your entries look right

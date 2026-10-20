@@ -14,9 +14,11 @@ const OS = { linux: 'Linux', darwin: 'Mac OS X', win32: 'Windows' }[platform()] 
 export const USER_AGENT = `sello-import/1.0 (${OS})`;
 
 export class SelloError extends Error {
-  constructor(status, message) {
+  constructor(status, message, retryAfter = null) {
     super(message);
     this.status = status;
+    /** Seconds the server asked to wait (Retry-After), if it said. */
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -82,7 +84,7 @@ export class Sello {
     }
     for (const c of res.headers.getSetCookie?.() ?? []) this.cookie = c.split(';')[0];
     const data = (res.headers.get('content-type') ?? '').includes('json') ? await res.json() : null;
-    if (!res.ok) throw new SelloError(res.status, data?.error ?? `${method} ${path} failed (${res.status})`);
+    if (!res.ok) throw new SelloError(res.status, data?.error ?? `${method} ${path} failed (${res.status})`, Number(res.headers.get('retry-after')) || null);
     return data;
   }
 

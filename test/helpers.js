@@ -44,7 +44,8 @@ const enc = new TextEncoder();
  * A server that behaves like Sello for the routes the importer uses. Its phone approves every
  * sign-in on the second poll (after "scanning" on the first) and hands over [jk] the real way.
  */
-export async function fakeSello({ quota = 1e9, maxFile = 10 * 1048576 } = {}) {
+// [refuse]: answers for the next photo uploads instead of taking them, e.g. {status: 429, retryAfter: 1, error}.
+export async function fakeSello({ quota = 1e9, maxFile = 10 * 1048576, refuse = [] } = {}) {
   const jkRaw = crypto.getRandomValues(new Uint8Array(32));
   const jk = await subtle.importKey('raw', jkRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);
   const requests = new Map();
@@ -98,6 +99,8 @@ export async function fakeSello({ quota = 1e9, maxFile = 10 * 1048576 } = {}) {
     if (url.pathname === '/api/posts' && url.searchParams.get('index')) return send(200, { index: [...posts.keys()].map((id) => [id, 1]) });
     if (req.method === 'POST' && url.pathname === '/api/media') {
       if (raw.length > maxFile + 64) return send(413, { error: 'too big' });
+      const no = refuse.shift();
+      if (no) return send(no.status, { error: no.error }, no.retryAfter ? { 'retry-after': String(no.retryAfter) } : {});
       const id = `m${++n}xxxxxxxxxxxxxxxx`;
       media.set(id, { bytes: raw, kind: url.searchParams.get('kind'), mime: url.searchParams.get('mime'), encrypted: url.searchParams.get('encrypted') });
       return send(200, { media: { id } });
