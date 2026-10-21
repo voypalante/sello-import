@@ -67,6 +67,24 @@ test('Day One ZIP: title from heading, inline photo, missing video, unescaping',
   assert.match(r.warnings[0], /videos\/bbb222\.mov is not in the export/);
 });
 
+test('Day One: the first line is the title even without a heading', () => {
+  const input = file('dayone-plain.zip', zip({
+    'Journal.json': JSON.stringify({
+      metadata: { version: '1.0' },
+      entries: [
+        { uuid: 'A', creationDate: '2021-03-04T05:06:07Z', text: 'Morning walk\nThe river was high\\.\n![](dayone-moment://P1)', photos: [{ identifier: 'P1', md5: 'aaa111', type: 'jpeg' }] },
+        { uuid: 'B', creationDate: '2021-03-05T05:06:07Z', text: 'Only one line here\\.' },
+      ],
+    }),
+    'photos/aaa111.jpeg': jpegWithExif(),
+  }));
+  const [a, b] = convert(input).entries;
+  assert.equal(a.title, 'Morning walk');
+  assert.equal(a.body, 'The river was high.\n![](files/1-aaa111.jpeg)');
+  assert.equal(b.title, 'Only one line here');
+  assert.equal(b.body, 'Only one line here.');
+});
+
 test('Markdown folder: front matter, dates from names, Obsidian and relative pictures', () => {
   const dir = join(tmp, 'notes');
   mkdirSync(join(dir, 'daily'), { recursive: true });

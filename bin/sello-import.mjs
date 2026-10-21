@@ -71,7 +71,7 @@ if (command === 'apps') {
   if (existsSync(outDir) && readdirSync(outDir).length && !isImportFolder(outDir)) fail(`${outDir} exists and isn't a sello-import folder; pick another --out`);
   let result;
   try {
-    result = writeEntries(outDir, src, adapter.name, adapter.read(src, { map }), { autoTitle: !o['no-title'] });
+    result = writeEntries(outDir, src, adapter.name, adapter.read(src, { map, title: !o['no-title'] }), { autoTitle: !o['no-title'] });
   } catch (err) {
     fail(err.message);
   } finally {

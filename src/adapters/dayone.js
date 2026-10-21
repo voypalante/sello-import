@@ -24,7 +24,7 @@ export default {
   detect(src) {
     return src.names().some((n) => n.toLowerCase().endsWith('.json') && isJournal(parse(src, n)));
   },
-  *read(src) {
+  *read(src, options = {}) {
     const byStem = new Map();
     for (const n of src.names()) byStem.set(basename(n).replace(/\.[^.]+$/, '').toLowerCase(), n);
     for (const name of src.names()) {
@@ -36,6 +36,12 @@ export default {
         let title = '';
         const first = body.match(/^#{1,6}\s+(.+)\n*/);
         if (first) { title = first[1].trim(); body = body.slice(first[0].length).trim(); }
+        // Day One shows the first line as the title even without a heading, so it moves there
+        // instead of being repeated above the text.
+        else if (options.title !== false) {
+          const line = body.match(/^([^\n]{1,120})\n+(?=\S)/);
+          if (line && !line[1].includes('](')) { title = line[1].trim(); body = body.slice(line[0].length).trim(); }
+        }
         const media = [];
         const attach = (list, scheme) => {
           for (const m of Array.isArray(list) ? list : []) {

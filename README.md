@@ -66,7 +66,7 @@ node bin/sello-import.mjs cleanup Journey-export-sello --yes
 | App | How to export | Notes |
 | --- | --- | --- |
 | Journey | Settings, Export, ZIP (JSON). One JSON file per entry with its photos | HTML formatting becomes Markdown. Journey has no titles; the first sentence is used (`--no-title` leaves them empty) |
-| Day One | Settings, Export, JSON (a ZIP) | Photos and videos keep their place in the text. Audio and PDFs aren't imported |
+| Day One | Settings, Export, JSON (a ZIP) | The first line becomes the title, as in Day One (`--no-title` leaves it in the text). Photos and videos keep their place in the text. Audio and PDFs aren't imported |
 | Markdown or text | A folder or ZIP of `.md` / `.txt` files, one entry per file | Date from front matter (`date:` or `created:`), else from the file name (`2020-09-13 Sunday.md`), else the file's date. Pictures linked with `![](path)` or `![[name]]` come along |
 | Anything else | A JSON list or CSV file, one row per entry | Columns are found by name (`date`, `title`, `body`/`text`/`content`, `tags`, `photos`...). Others: `--map date=When,body=Notes,media=Attachments`. Photo paths are relative to the file, separated by `;` |
 
