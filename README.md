@@ -10,6 +10,11 @@ journal as a private entry with its original date, tags and photos.
 Your entries are encrypted on your computer before anything is sent, with your journal's key, the
 same way the Sello web app does it. The server never sees them in the clear.
 
+**No terminal needed for most journals:** the Sello web app imports the same Journey, Day One and
+Markdown ZIPs from Settings › Your data › Import…, encrypting them in your browser. See the
+[guide](https://sello.voypalante.com/guide/import-journey). Use this tool for JSON or CSV tables,
+a folder that isn't zipped, or a very large journal.
+
 ## What you need
 
 - [Node.js](https://nodejs.org) 20 or newer.
