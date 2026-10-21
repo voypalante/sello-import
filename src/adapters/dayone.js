@@ -1,4 +1,4 @@
-// Day One: Settings > Export, "JSON" (a ZIP). One JSON per journal with every entry, and the
+// Day One: Settings > Journals > (journal) > Export Journal > Export journal JSON file (a ZIP). One JSON per journal with every entry, and the
 // files in photos/ and videos/ named by their MD5:
 //   {"metadata": {"version": "1.0"}, "entries": [{"uuid": "…", "creationDate": "2020-09-13T12:26:40Z",
 //    "text": "# Title\n\nText ![](dayone-moment://ABC)", "tags": [], "location": {"placeName": "…"},
