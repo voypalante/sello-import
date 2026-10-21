@@ -44,6 +44,28 @@ test('Journey ZIP: HTML text, date, tags, place, photo', () => {
   assert.deepEqual(readFileSync(join(r.out, e.files[0])), jpegWithExif());
 });
 
+test('Journey Drive backup: a folder per entry, photos found in it, encrypted entries left out', () => {
+  const input = file('backup.zip', zip({
+    'abc/': '',
+    'abc/abc.json': JSON.stringify({
+      id: 'abc', dateOfJournal: '2021-03-04T05:06:07.000Z', timezone: 'America/Panama', type: 'html', encrypted: false,
+      text: '<p>Rainy day.</p>', tags: ['home'], address: '', location: null, schemaVersion: 2,
+    }),
+    'abc/p2.jpg': jpegWithExif(),
+    'abc/p1.jpg': jpegWithExif(),
+    'def/def.json': JSON.stringify({ id: 'def', dateOfJournal: '2021-03-05T05:06:07.000Z', type: 'html', encrypted: true, text: 'x', schemaVersion: 2 }),
+  }));
+  const r = convert(input);
+  assert.equal(r.adapter, 'journey');
+  assert.equal(r.entries.length, 1);
+  const [e] = r.entries;
+  assert.equal(e.id, 'journey:abc');
+  assert.equal(e.date, '2021-03-04T05:06:07.000Z');
+  assert.equal(e.body, 'Rainy day.\n\n![](files/1-p1.jpg)\n\n![](files/2-p2.jpg)');
+  assert.deepEqual(e.tags, ['home']);
+  assert.deepEqual(r.warnings, ['skipped an entry from 2021-03-05: encrypted in Journey']);
+});
+
 test('Day One ZIP: title from heading, inline photo, missing video, unescaping', () => {
   const input = file('dayone.zip', zip({
     'Journal.json': JSON.stringify({

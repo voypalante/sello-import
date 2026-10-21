@@ -39,9 +39,9 @@ const safeName = (n) => basename(n).normalize('NFC').replace(/[^\p{L}\p{N}._-]+/
 
 /**
  * Writes what an adapter read into [outDir]. Each item: {id, date, title, body, tags, place,
- * media: [{name, ref}]}, where name is the file's path in the export and ref (optional) is the text
+ * media: [{name, ref}], skip}, where name is the file's path in the export and ref (optional) is the text
  * in body that stands for it; ref is replaced with the copied file's path, and media without a ref
- * go at the end of the entry.
+ * go at the end of the entry. An item with skip (the reason) is left out with a warning.
  */
 export function writeEntries(outDir, src, sourceName, items, { autoTitle = true } = {}) {
   mkdirSync(join(outDir, 'files'), { recursive: true });
@@ -55,6 +55,7 @@ export function writeEntries(outDir, src, sourceName, items, { autoTitle = true 
     const label = item.title || item.id;
     const date = toDate(item.date);
     if (!date) { warnings.push(`skipped "${label}": no date`); continue; }
+    if (item.skip) { warnings.push(`skipped an entry from ${date.toISOString().slice(0, 10)}: ${item.skip}`); continue; }
     const id = `${sourceName}:${item.id}`;
     if (ids.has(id)) { warnings.push(`skipped a second entry with id ${item.id}`); continue; }
     ids.add(id);

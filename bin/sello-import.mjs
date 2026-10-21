@@ -77,7 +77,7 @@ if (command === 'apps') {
   } finally {
     src.close();
   }
-  console.log(`Read as ${adapter.name}: ${result.entries.length} entries, ${result.files} ${result.files === 1 ? 'photo or video' : 'photos and videos'} → ${outDir}`);
+  console.log(`Read as ${adapter.name}: ${result.entries.length} ${result.entries.length === 1 ? 'entry' : 'entries'}, ${result.files} ${result.files === 1 ? 'photo or video' : 'photos and videos'} → ${outDir}`);
   if (result.warnings.length) console.log(`${result.warnings.length} note(s):\n  ${result.warnings.slice(0, 50).join('\n  ')}${result.warnings.length > 50 ? `\n  …and ${result.warnings.length - 50} more` : ''}`);
   console.log(`\nNext: sello-import upload ${outDir} --dry-run`);
   console.log('That folder holds your journal unencrypted; delete it when done (sello-import cleanup).');

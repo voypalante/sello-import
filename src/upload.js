@@ -63,7 +63,7 @@ export async function upload(dir, { server, dryRun = false, limit = Infinity, pl
   const dates = entries.map((e) => toDate(e.date)).filter(Boolean).sort((a, b) => a - b);
 
   log(`${source ?? 'entries'} → Sello (${server})`);
-  log(`  ${entries.length} entries${dates.length ? `, ${dates[0].toISOString().slice(0, 10)} to ${dates.at(-1).toISOString().slice(0, 10)}` : ''}`);
+  log(`  ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}${dates.length ? `, ${dates[0].toISOString().slice(0, 10)} to ${dates.at(-1).toISOString().slice(0, 10)}` : ''}`);
   log(`  ${sizes.size} ${sizes.size === 1 ? "photo or video" : "photos and videos"}, ${mb(total)} MB in all`);
   log('  all private, encrypted here before they are sent');
   const big = [...sizes].filter(([, n]) => n > 10 * 1048576);
