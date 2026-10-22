@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -42,7 +43,9 @@ test('signs in with the phone, encrypts and uploads, and a second run skips ever
     const r = await upload(dir, { server: server.url, client: fast(server.url), showLogin: (s) => shown.push(s), place: true, ...quiet });
     assert.equal(r.added, 2);
     assert.deepEqual(shown.map((s) => s.scanned), [false, true]);
-    assert.match(shown[0].qr, /^sello:\/\/approve\/req\d+x+\?h=127\.0\.0\.1:\d+$/);
+    assert.match(shown[0].qr, /^sello:\/\/approve\/req\d+x+\?h=127\.0\.0\.1:\d+&k=[0-9a-f]{64}$/);
+    // k is the hash of the key the server got, so the phone can tell if it was swapped.
+    assert.equal(shown[0].qr.split('&k=')[1], createHash('sha256').update([...server.requests.values()][0].pub).digest('hex'));
     assert.match([...server.requests.values()][0].ua, /^sello-import\/1\.0 \(/);
 
     const post = server.posts.get(selloId('u1', 'journey:a'));

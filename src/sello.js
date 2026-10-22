@@ -27,6 +27,14 @@ export async function newKeyPair() {
   return { privateKey: pair.privateKey, publicKey: b64(new Uint8Array(await subtle.exportKey('spki', pair.publicKey))) };
 }
 
+/**
+ * k in the QR code: sha256 hex of the public key's base64 text. The phone checks it against the key the
+ * server hands over, so a key swapped on the way is refused. Same as Sello's web/src/lib/crypto.js.
+ */
+export async function keyHash(publicKey) {
+  return Buffer.from(await subtle.digest('SHA-256', enc.encode(publicKey))).toString('hex');
+}
+
 /** The journal key from the phone's {epk, iv, ct}, as a key whose bytes JavaScript never sees. */
 export async function openJournalKey(privateKey, sealed, requestId) {
   const epk = await subtle.importKey('spki', unb64(sealed.epk), { name: 'ECDH', namedCurve: 'P-256' }, false, []);
@@ -97,7 +105,7 @@ export class Sello {
     for (let attempt = 1; attempt <= attempts; attempt++) {
       const keys = await newKeyPair();
       const req = await this.request('/api/login-requests', { method: 'POST', json: { purpose: 'login', browserPublicKey: keys.publicKey } });
-      const qr = `sello://approve/${req.id}?h=${host}`;
+      const qr = `sello://approve/${req.id}?h=${host}&k=${await keyHash(keys.publicKey)}`;
       show({ qr, code: req.code, scanned: false, attempt, attempts });
       let scanned = false;
       for (;;) {
